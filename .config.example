@@ -1,0 +1,11 @@
+### Required Fields
+
+ZONE_ID="" #Your CloudFlare Zone ID, refer to README for more info
+DNS_RECORD_ID="" #Separated by comma if multiple, i.e., "id1,id2,id3", refer to README for more info
+EMAIL="" #Your CloudFlare e-mail address
+ACESS_TOKEN="" #Your CloudFlare Access Token, refer to README for more info
+
+### Optional Fields (Leave blank if not desired)
+
+UPDATE_INTERVAL="" #Interval to check if IP has changed in seconds; default is 60 seconds.
+PUSHOVER_API_KEY="" #Optional Push notifications via Pushover API whenever a DNS record is successfully updated.
