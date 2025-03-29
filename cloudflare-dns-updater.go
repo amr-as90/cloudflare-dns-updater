@@ -35,47 +35,28 @@ func main() {
 		log.Fatal("Zone ID was not set")
 	}
 
-	recordIDs := os.Getenv("DNS_RECORD_ID")
-	if recordIDs == "" {
-		log.Fatal("No DNS records set")
-	}
-
-	recordIDsSplit := strings.Split(recordIDs, ",")
-	for i := range recordIDsSplit {
-		recordIDsSplit[i] = strings.TrimSpace(recordIDsSplit[i])
-	}
-
 	recordNames := os.Getenv("RECORD_NAMES")
 	if recordNames == "" {
 		log.Fatal("No record names set")
 	}
 
-	recordNamesSplit := strings.Split(recordNames, ",")
-
-	for i := range recordNamesSplit {
-		recordNamesSplit[i] = strings.TrimSpace(recordNamesSplit[i])
-	}
-
-	if len(recordNamesSplit) != len(recordIDsSplit) {
-		log.Fatal("Number of record ID entries must match record name entries")
-	}
-
 	email := os.Getenv("EMAIL")
 	if email == "" {
-		log.Fatal("No e-mail set")
+		log.Fatal("Email was not set")
 	}
 
 	apiKey := os.Getenv("ACCESS_TOKEN")
 	if apiKey == "" {
-		log.Fatal("No API key set")
+		log.Fatal("API key was not set")
 	}
 
-	updateIntervalString := os.Getenv("UPDATE_INTERVAL")
-	updateInterval := 60 // Default to 60 seconds if not specified
-	if updateIntervalString != "" {
-		interval, err := strconv.Atoi(updateIntervalString)
+	updateInterval := 60 // Default to 60 seconds if not set
+
+	updateIntervalStr := os.Getenv("UPDATE_INTERVAL")
+	if updateIntervalStr != "" {
+		interval, err := strconv.Atoi(updateIntervalStr)
 		if err != nil {
-			log.Fatalf("Error while getting update interval: %s", err)
+			log.Fatalf("Invalid update interval: %s", err)
 		}
 		updateInterval = interval
 	}
@@ -83,10 +64,15 @@ func main() {
 	pushoverAppToken := os.Getenv("PUSHOVER_APP_TOKEN")
 	pushoverUserKey := os.Getenv("PUSHOVER_USER_KEY")
 
+	recordNamesSplit := strings.Split(recordNames, ",")
+	records := make(map[string]string)
+	for _, name := range recordNamesSplit {
+		records[strings.TrimSpace(name)] = "" // Initialize with empty IDs
+	}
+
 	cfg := cfConfig{
 		zoneID:           zoneID,
-		dnsRecordID:      recordIDsSplit,
-		dnsRecordNames:   recordNamesSplit,
+		records:          records,
 		eMail:            email,
 		apiKey:           apiKey,
 		pushoverAppToken: pushoverAppToken,
@@ -99,8 +85,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	err := cfg.GetDomainID()
+	if err != nil {
+		log.Fatalf("Error while getting domain ID's: %s", err)
+	}
+
 	// Initial update
-	err := cfg.cloudFlareUpdate(CurrentIP)
+	err = cfg.cloudFlareUpdate(CurrentIP)
 	if err != nil {
 		log.Printf("Error updating DNS records: %s", err)
 	}
@@ -108,7 +99,7 @@ func main() {
 	ticker := time.NewTicker(time.Duration(updateInterval) * time.Second)
 	defer ticker.Stop()
 
-	fmt.Printf("IP check scheduled every %d seconds\n", updateInterval)
+	fmt.Printf("Checking IP every %d seconds\n", updateInterval)
 
 	for {
 		select {

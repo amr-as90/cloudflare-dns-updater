@@ -13,8 +13,7 @@ import (
 
 type cfConfig struct {
 	zoneID           string
-	dnsRecordID      []string
-	dnsRecordNames   []string
+	records          map[string]string // name -> ID
 	eMail            string
 	apiKey           string
 	pushoverAppToken string
@@ -34,16 +33,22 @@ type cfResponse struct {
 	Success bool `json:"success"`
 }
 
+// In cloudFlareUpdate method:
 func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
+	if len(cfg.records) == 0 {
+		return fmt.Errorf("no DNS records available")
+	}
 
-	for i := range cfg.dnsRecordID {
+	for name, id := range cfg.records {
+		if id == "" {
+			return fmt.Errorf("empty DNS record ID for %s", name)
+		}
 
 		reqStruct := requestStruct{
 			Comment:    "Updated automatically via Go CloudFlare updater",
 			Content:    newIP,
-			Name:       cfg.dnsRecordNames[i],
+			Name:       name, // Use the map key directly
 			Proxied:    false,
-			Ttl:        3600,
 			RecordType: "A",
 		}
 
@@ -52,7 +57,7 @@ func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
 			return err
 		}
 
-		cfURL := "https://api.cloudflare.com/client/v4/zones/" + cfg.zoneID + "/dns_records/" + cfg.dnsRecordID[i]
+		cfURL := "https://api.cloudflare.com/client/v4/zones/" + cfg.zoneID + "/dns_records/" + cfg.records[name] // Use the map value directly as the ID paramete
 
 		req, err := http.NewRequest("PUT", cfURL, bytes.NewBuffer([]byte(jsonData)))
 		if err != nil {
@@ -61,7 +66,7 @@ func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
 
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("X-Auth-Email", cfg.eMail)
-		req.Header.Set("X-Auth-Key", cfg.apiKey)
+		req.Header.Set("Authorization", "Bearer "+cfg.apiKey)
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -83,20 +88,21 @@ func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
 		}
 
 		if cfResponse.Success {
-			fmt.Printf("IP updated successfuly for: %s, new IP is: %s\n", cfg.dnsRecordNames[i], newIP)
+			fmt.Printf("IP updated successfully for: %s, new IP is: %s\n", name, newIP)
 			if cfg.pushoverAppToken != "" && cfg.pushoverUserKey != "" {
 				app := pushover.New(cfg.pushoverAppToken)
 				recipient := pushover.NewRecipient(cfg.pushoverUserKey)
-				message := pushover.NewMessageWithTitle(fmt.Sprintf("IP of DNS record %s changed to %s", cfg.dnsRecordNames[i], newIP), "IP Changed")
+				message := pushover.NewMessageWithTitle(
+					fmt.Sprintf("IP of DNS record %s changed to %s", name, newIP),
+					"IP Changed")
 				_, err := app.SendMessage(message, recipient)
 				if err != nil {
 					log.Printf("Error sending Pushover notification: %s", err)
 				}
 			}
 		} else {
-			fmt.Printf("Unable to update IP for %s. Something went wrong.\n", cfg.dnsRecordNames[i])
+			fmt.Printf("Unable to update IP for %s. Something went wrong.\n", name)
 		}
-
 	}
 	return nil
 }
