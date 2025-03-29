@@ -14,14 +14,13 @@ You can optionally set it to send Pushover notifications whenever a DNS record i
 2. Copy the `.config.example` file to `.config` in the same directory as the program
 3. Edit the .config file to your liking
 4. Run the program with `go run .` or `go run cloudflare-dns-updater.go`
-5. Enjoy!
 
 ## Configuration
 
 The configuration file consists of mandatory and optional fields. The mandatory fields are:
 1. Zone ID
-2. API Token
-4. DNS Record Name's
+2. CloudFlare API Access Token
+4. DNS Record Names
 
 ### 1. Zone ID
 The Zone ID is the Zone ID of the domain name on your CloudFlare account you want to update. You can find it by navigating to your [CloudFlare dashboard](https://dash.cloudflare.com) and selecting the domain name you wish to update. The Zone ID is located at the bottom of the page on the right side:
