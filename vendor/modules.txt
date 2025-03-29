@@ -1,3 +1,6 @@
+# github.com/gregdel/pushover v1.3.1
+## explicit; go 1.14
+github.com/gregdel/pushover
 # github.com/joho/godotenv v1.5.1
 ## explicit; go 1.12
 github.com/joho/godotenv
