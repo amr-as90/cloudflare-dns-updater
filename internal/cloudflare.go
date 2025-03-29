@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"bytes"
@@ -11,13 +11,13 @@ import (
 	"github.com/gregdel/pushover"
 )
 
-type cfConfig struct {
-	zoneID           string
-	records          map[string]string // name -> ID
-	eMail            string
-	apiKey           string
-	pushoverAppToken string
-	pushoverUserKey  string
+type CFConfig struct {
+	ZoneID           string
+	Records          map[string]string // name -> ID
+	EMail            string
+	ApiKey           string
+	PushoverAppToken string
+	PushoverUserKey  string
 }
 
 type requestStruct struct {
@@ -34,12 +34,12 @@ type cfResponse struct {
 }
 
 // In cloudFlareUpdate method:
-func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
-	if len(cfg.records) == 0 {
+func (cfg CFConfig) CloudFlareUpdate(newIP string) error {
+	if len(cfg.Records) == 0 {
 		return fmt.Errorf("no DNS records available")
 	}
 
-	for name, id := range cfg.records {
+	for name, id := range cfg.Records {
 		if id == "" {
 			return fmt.Errorf("empty DNS record ID for %s", name)
 		}
@@ -57,7 +57,7 @@ func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
 			return err
 		}
 
-		cfURL := "https://api.cloudflare.com/client/v4/zones/" + cfg.zoneID + "/dns_records/" + cfg.records[name] // Use the map value directly as the ID paramete
+		cfURL := "https://api.cloudflare.com/client/v4/zones/" + cfg.ZoneID + "/dns_records/" + cfg.Records[name] // Use the map value directly as the ID paramete
 
 		req, err := http.NewRequest("PUT", cfURL, bytes.NewBuffer([]byte(jsonData)))
 		if err != nil {
@@ -65,8 +65,8 @@ func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("X-Auth-Email", cfg.eMail)
-		req.Header.Set("Authorization", "Bearer "+cfg.apiKey)
+		req.Header.Set("X-Auth-Email", cfg.EMail)
+		req.Header.Set("Authorization", "Bearer "+cfg.ApiKey)
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -89,9 +89,9 @@ func (cfg cfConfig) cloudFlareUpdate(newIP string) error {
 
 		if cfResponse.Success {
 			fmt.Printf("IP updated successfully for: %s, new IP is: %s\n", name, newIP)
-			if cfg.pushoverAppToken != "" && cfg.pushoverUserKey != "" {
-				app := pushover.New(cfg.pushoverAppToken)
-				recipient := pushover.NewRecipient(cfg.pushoverUserKey)
+			if cfg.PushoverAppToken != "" && cfg.PushoverUserKey != "" {
+				app := pushover.New(cfg.PushoverAppToken)
+				recipient := pushover.NewRecipient(cfg.PushoverUserKey)
 				message := pushover.NewMessageWithTitle(
 					fmt.Sprintf("IP of DNS record %s changed to %s", name, newIP),
 					"IP Changed")

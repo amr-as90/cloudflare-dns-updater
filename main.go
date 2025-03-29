@@ -8,13 +8,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/amr-as90/cloudflare-dns-updater/internal"
+
 	"github.com/joho/godotenv"
 )
 
 var CurrentIP string
 
 func init() {
-	ip, err := GetIP()
+	ip, err := internal.GetIP()
 	if err != nil {
 		fmt.Printf("Could not get new IP: %s", err)
 		return
@@ -70,13 +72,13 @@ func main() {
 		records[strings.TrimSpace(name)] = "" // Initialize with empty IDs
 	}
 
-	cfg := cfConfig{
-		zoneID:           zoneID,
-		records:          records,
-		eMail:            email,
-		apiKey:           apiKey,
-		pushoverAppToken: pushoverAppToken,
-		pushoverUserKey:  pushoverUserKey,
+	cfg := internal.CFConfig{
+		ZoneID:           zoneID,
+		Records:          records,
+		EMail:            email,
+		ApiKey:           apiKey,
+		PushoverAppToken: pushoverAppToken,
+		PushoverUserKey:  pushoverUserKey,
 	}
 
 	fmt.Printf("Current IP is: %s\n", CurrentIP)
@@ -91,7 +93,7 @@ func main() {
 	}
 
 	// Initial update
-	err = cfg.cloudFlareUpdate(CurrentIP)
+	err = cfg.CloudFlareUpdate(CurrentIP)
 	if err != nil {
 		log.Printf("Error updating DNS records: %s", err)
 	}
@@ -104,7 +106,7 @@ func main() {
 	for {
 		select {
 		case <-ticker.C:
-			newIP, err := GetIP()
+			newIP, err := internal.GetIP()
 			if err != nil {
 				log.Printf("Error getting IP: %s", err)
 				continue
@@ -112,7 +114,7 @@ func main() {
 
 			if newIP != CurrentIP {
 				fmt.Printf("IP changed from %s to %s\n", CurrentIP, newIP)
-				err = cfg.cloudFlareUpdate(newIP)
+				err = cfg.CloudFlareUpdate(newIP)
 				if err != nil {
 					log.Printf("Error updating DNS records: %s", err)
 				} else {

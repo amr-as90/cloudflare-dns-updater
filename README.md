@@ -10,11 +10,24 @@ You can optionally set it to send Pushover notifications whenever a DNS record i
 - Pushover account (optional)
 
 ## Usage
+
+### Manual Installation
+
 1. Clone the repository
 2. Copy the `.config.example` file to `.config` in the same directory as the program
 3. Edit the .config file to your liking
-4. Run the program with `go run .` or `go run cloudflare-dns-updater.go`
-5. Enjoy!
+4. Run the program with `go run .` or `go run main.go`
+
+
+### Install Pre-Compiled Binary
+
+There is currently a pre-compiled binary for Linux x64 under [releases](https://github.com/amr-as90/cloudflare-dns-updater/releases/), if you would like to use this, follow these instructions instead.
+
+1. Download the binary
+2. Create a .config file with `touch .config`
+3. Copy the contents of the .config.example found in the repo into the .config file you just created
+4. Fill out the fields accordingly
+
 
 ## Configuration
 
