@@ -33,7 +33,6 @@ type cfResponse struct {
 	Success bool `json:"success"`
 }
 
-// In cloudFlareUpdate method:
 func (cfg CFConfig) CloudFlareUpdate(newIP string) error {
 	if len(cfg.Records) == 0 {
 		return fmt.Errorf("no DNS records available")
