@@ -10,4 +10,3 @@ ACCESS_TOKEN="" #Your CloudFlare Access Token, refer to README for more info
 UPDATE_INTERVAL="" #Interval to check if IP has changed in seconds; default is 60 seconds.
 PUSHOVER_APP_TOKEN="" #Optional Push notifications via Pushover API whenever a DNS record is successfully updated.
 PUSHOVER_USER_KEY="" #User or group key for optional Pushover notifications (who you want to receive the notifications)
-

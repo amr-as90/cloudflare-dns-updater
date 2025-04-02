@@ -21,7 +21,7 @@ docker run -d \
   -e UPDATE_INTERVAL="60" \
   -e PUSHOVER_APP_TOKEN="your_app_token" \
   -e PUSHOVER_USER_KEY="your_user_key" \
-  cloudflare-dns-updater
+  renderex/cloudflare-dns-updater:latest
 ```
 
 
