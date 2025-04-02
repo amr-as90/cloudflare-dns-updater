@@ -14,6 +14,7 @@ You can optionally set it to send Pushover notifications whenever a DNS record i
 
 ```bash
 docker run -d \
+  --name cloudflare-dns-updater \
   -e ZONE_ID="your_zone_id" \
   -e RECORD_NAMES="sub1.example.com, sub2.example.com" \
   -e EMAIL="your@email.com" \
