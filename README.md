@@ -10,6 +10,20 @@ You can optionally set it to send Pushover notifications whenever a DNS record i
 - Pushover account (optional)
 
 ## Usage
+### Easy install with Docker
+
+```bash
+docker run -d \
+  -e ZONE_ID="your_zone_id" \
+  -e RECORD_NAMES="sub1.example.com, sub2.example.com" \
+  -e EMAIL="your@email.com" \
+  -e ACCESS_TOKEN="your_access_token" \
+  -e UPDATE_INTERVAL="60" \
+  -e PUSHOVER_APP_TOKEN="your_app_token" \
+  -e PUSHOVER_USER_KEY="your_user_key" \
+  cloudflare-dns-updater
+```
+
 
 ### Manual Installation
 
